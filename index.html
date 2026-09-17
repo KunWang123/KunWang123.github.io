@@ -1,17 +1,414 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <title>王坤</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的主页 · 照片与信息</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #494e52;
+    --muted: #7a8288;
+    --accent: #2d78ad;
+    --accent-dark: #1f5f8b;
+    --border: #e3e6e8;
+    --panel: #fafbfc;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                 "Hiragino Sans GB", "Microsoft YaHei", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-dark); text-decoration: underline; }
+
+  /* ---------- Layout ---------- */
+  .page {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    margin: 0 auto;
+    gap: 40px;
+    padding: 40px 15% 40px 10%;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    position: sticky;
+    top: 40px;
+    align-self: start;
+  }
+
+  .avatar {
+    width: 100%;
+    max-width: 220px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid var(--border);
+    background: var(--panel);
+    display: block;
+    margin: 0 auto 20px;
+    cursor: pointer;
+    transition: box-shadow .2s;
+  }
+  .avatar:hover { box-shadow: 0 0 0 4px rgba(45,120,173,.15); }
+
+  .name {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    color: #2b2f33;
+  }
+
+  .role {
+    margin: 6px 0 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .contacts {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .contact-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-size: 16px;
+    font-weight: 600;
+    transition: all .15s;
+  }
+  .contact-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); text-decoration: none; }
+
+  /* ---------- Main ---------- */
+  .main { min-width: 0; }
+
+  section { margin-bottom: 44px; }
+
+  h2 {
+    font-size: 22px;
+    color: #2b2f33;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 8px;
+    margin: 0 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .lead { color: var(--text); }
+
+  /* ---------- Work Experience ---------- */
+  .work-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .work-item {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 18px;
+    background: #fff;
+  }
+
+  .work-item .head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .work-item .company { margin: 0; font-size: 16px; font-weight: 600; color: #2b2f33; }
+  .work-item .company .loc { font-size: 14px; font-weight: 400; color: var(--muted); }
+  .work-item .work-role { margin: 4px 0 0; font-size: 14px; color: var(--text); }
+  .work-item .work-date { font-size: 12px; color: var(--muted); white-space: nowrap; padding-top: 3px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .btn:hover { background: var(--accent-dark); border-color: var(--accent-dark); text-decoration: none; color:#fff; }
+
+  .btn.ghost { background: transparent; color: var(--accent); }
+  .btn.ghost:hover { background: rgba(45,120,173,.08); }
+
+  input[type="text"], input[type="url"] {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--text);
+    width: 100%;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(45,120,173,.12);
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 100;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow: auto;
+    padding: 26px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.3);
+  }
+  .modal h3 { margin: 0 0 18px; font-size: 18px; color: #2b2f33; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+  .modal .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 900px) {
+    .page { grid-template-columns: 1fr; padding: 24px 10% 24px 5%; gap: 24px; }
+    .sidebar { position: static; }
+    .avatar { max-width: 140px; }
+  }
+</style>
 </head>
 <body>
-<h1>kunwang</h1>
-<p>Affiliation: 【Tianjin University】</p>
-<p>Email: roy_wang@tju.edu.cn</p>
-<p>Research Interests:  Computer Vision, 3D AIGC, 3D Reconstruct </p>
-<h2>Publications</h2>
-<ul>
-<li> </li>
-</ul>
+<div class="page">
+
+  <!-- ===================== Sidebar ===================== -->
+  <aside class="sidebar">
+    <img id="avatar" class="avatar" src="img/my.jpg" alt="头像" title="点击更换头像">
+    <h1 id="nameText" class="name" contenteditable="true" spellcheck="false">我的名字</h1>
+    <p id="roleText" class="role" contenteditable="true" spellcheck="false">我的身份 / 一句话介绍</p>
+
+    <div class="contacts">
+      <a id="c-email" class="contact-btn" href="mailto:you@example.com" title="邮箱">@</a>
+      <button id="editContacts" class="contact-btn" title="编辑链接" style="font-size:14px;">✎</button>
+    </div>
+  </aside>
+
+  <!-- ===================== Main ===================== -->
+  <main class="main">
+
+    <section id="about">
+      <h2>About Me</h2>
+      <p id="aboutText" class="lead" contenteditable="true" spellcheck="false">
+        I graduated with a Master’s degree from Tianjin University, and I am currently serving as an algorithm engineer at Dewu.
+      </p>
+    </section>
+
+    <section id="work">
+      <h2>Work Experience</h2>
+      <div class="work-list">
+        <div class="work-item">
+          <div class="head">
+            <div>
+              <h3 class="company">DEWU <span class="loc">(Shanghai)</span></h3>
+              <p class="work-role">Algorithm Engineer</p>
+            </div>
+            <span class="work-date">2023 – 至今</span>
+          </div>
+        </div>
+        <div class="work-item">
+          <div class="head">
+            <div>
+              <h3 class="company">SenseTime <span class="loc">(Shanghai)</span></h3>
+              <p class="work-role">Researcher</p>
+            </div>
+            <span class="work-date">2020 – 2023</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer style="border-top:1px solid var(--border);padding-top:16px;color:var(--muted);font-size:13px;">
+      个人信息保存在本地浏览器中（localStorage）。清除浏览器数据会一并清除。
+    </footer>
+  </main>
+</div>
+
+<!-- ============ 编辑联系人 Modal ============ -->
+<div id="contactModal" class="modal-overlay">
+  <div class="modal">
+    <h3>编辑邮箱</h3>
+    <div class="field">
+      <label>邮箱</label>
+      <input type="text" id="contactEmail" placeholder="you@example.com">
+    </div>
+    <div class="actions">
+      <button id="contactCancel" class="btn ghost">取消</button>
+      <button id="contactSave" class="btn">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORE = "home_data_v1";
+
+  var defaults = {
+    name: "Kun Wang",
+    role: "Researcher / Software Engineer",
+    about: "I graduated with a Master’s degree from Tianjin University, and I am currently serving as an algorithm engineer at Dewu.",
+    email: "roy_wang@tju.edu.cn"
+  };
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE);
+      if (raw) {
+        var d = JSON.parse(raw);
+        for (var k in defaults) if (d[k] === undefined) d[k] = defaults[k];
+        return d;
+      }
+    } catch (e) { console.warn("读取数据失败", e); }
+    return JSON.parse(JSON.stringify(defaults));
+  }
+
+  var state = load();
+
+  function save() {
+    try {
+      localStorage.setItem(STORE, JSON.stringify(state));
+    } catch (e) {
+      alert("保存失败：本地存储空间已满（头像太大）。可尝试使用更小的图片。");
+      console.error(e);
+    }
+  }
+
+  /* ---------- 渲染 ---------- */
+  var $ = function (id) { return document.getElementById(id); };
+
+  function renderProfile() {
+    $("avatar").src = state.avatar || "img/my.jpg";
+    $("nameText").textContent = state.name;
+    $("roleText").textContent = state.role;
+    $("aboutText").textContent = state.about;
+    $("c-email").href = "mailto:" + state.email;
+  }
+
+  /* ---------- 头像 & 文本编辑 ---------- */
+  function compressImage(file, cb) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var img = new Image();
+      img.onload = function () {
+        var maxW = 1200;
+        var scale = Math.min(1, maxW / img.width);
+        var w = Math.round(img.width * scale);
+        var h = Math.round(img.height * scale);
+        var canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        cb(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      img.onerror = function () { alert("图片读取失败"); };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function compressAvatar(file) {
+    compressImage(file, function (dataUrl) { state.avatar = dataUrl; save(); renderProfile(); });
+  }
+
+  function bindText(el, key) {
+    el.addEventListener("blur", function () {
+      var v = el.textContent.trim();
+      state[key] = v || defaults[key];
+      save();
+    });
+    el.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); el.blur(); } });
+  }
+
+  /* ---------- 事件绑定 ---------- */
+  $("editContacts").addEventListener("click", function () {
+    $("contactEmail").value = state.email;
+    $("contactModal").classList.add("open");
+  });
+  $("contactCancel").addEventListener("click", function () { $("contactModal").classList.remove("open"); });
+  $("contactSave").addEventListener("click", function () {
+    state.email = $("contactEmail").value.trim() || "you@example.com";
+    save(); renderProfile();
+    $("contactModal").classList.remove("open");
+  });
+
+  $("avatar").addEventListener("click", function () {
+    var input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.addEventListener("change", function (e) {
+      if (e.target.files.length) compressAvatar(e.target.files[0]);
+    });
+    input.click();
+  });
+
+  // 点击 modal 空白处关闭
+  $("contactModal").addEventListener("click", function (e) { if (e.target === this) this.classList.remove("open"); });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      $("contactModal").classList.remove("open");
+    }
+  });
+
+  bindText($("nameText"), "name");
+  bindText($("roleText"), "role");
+  bindText($("aboutText"), "about");
+
+  renderProfile();
+})();
+</script>
 </body>
 </html>
